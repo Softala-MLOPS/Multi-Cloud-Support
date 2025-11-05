@@ -9,12 +9,12 @@
  - ssh commandline connection 
  ## API requirements
  ## Technology Stack
- ## Required Features
- ### Setting up cpouta vm's
+ # Required Features
+ ## Setting up cpouta vm's
  1. Create 2 new projects at CSC
  2. Create virtual machines on both projects using cPouta [Guide](https://docs.csc.fi/cloud/pouta/launch-vm-from-web-gui/). (windows powershell in our case)
  3. Connect to vms with ssh via local powershell. cPuota [Guide](https://docs.csc.fi/cloud/pouta/connecting-to-vm/)
- ### Setting up Wireguard
+ ## Setting up Wireguard
  - You are connected on vm´s via ssh setting up is faster when done with a pair because we need to run commands on both vm´s.
  - Wireguard requires root user access to work. We want to change user´s on both vms
    
