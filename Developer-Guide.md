@@ -9,12 +9,25 @@
  - ssh commandline connection 
  ## API requirements
  ## Technology Stack
+ - Kind
+ - K8s
+ - Submariner
+ - Wireguard
+ - Docker
+ - kubectl
+ - curl
+ - 
  # Required Features
  ## Setting up cpouta vm's
+ 
  1. Create 2 new projects at CSC
  2. Create virtual machines on both projects using cPouta [Guide](https://docs.csc.fi/cloud/pouta/launch-vm-from-web-gui/). (windows powershell in our case)
  3. Connect to vms with ssh via local powershell. cPuota [Guide](https://docs.csc.fi/cloud/pouta/connecting-to-vm/)
+
+Authors: Kosti Kangasmaa and Jouni Tuomela
+
  ## Setting up Wireguard
+ We need wireguard tunnel for Multi-Cloud-Feature because we need to access vm-a from vm-b and vice versa for ease of use and also to host Submariner Broker API at an address that both vm´s see
  - You are connected on vm´s via ssh setting up is faster when done with a pair because we need to run commands on both vm´s.
  - Wireguard requires root user access to work. We want to change user´s on both vms
    
@@ -101,3 +114,6 @@ wg-quick up wg0
 ```bash
 ping 10.0.0.2
 ```
+Authors: Kosti Kangasmaa and Jouni Tuomela
+
+## Submariner sandbox with Wireguard that submariner handles with 2 different Vm´s on Openstack 
