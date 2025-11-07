@@ -164,10 +164,22 @@ cd /etc/ssh/sshd_config.d
 PasswordAuthentication yes
   ```
 ![wg-ping](/images/password_authentiction.png)
+- Confirm changes 
+```
+  CTRL + O
+  ```
+- Name the file 
+```
+  ENTER
+  ```
+- Exit the file
+```
+  CTRL + X
+  ```
 - This overrides the default cPouta settings (which diables password logins for security reasons)
 #### Restart SSH service
 ```bash 
-systemctl restart ssh
+  systemctl restart ssh
   ```
 #### Result
 - Now vm-a can connect to vm-b using SCP or SSH with the credential of the newly created user:
