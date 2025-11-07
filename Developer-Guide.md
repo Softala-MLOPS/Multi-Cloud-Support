@@ -111,10 +111,17 @@ AllowedIPs = 10.0.0.1/32 #VM-A future CIDR that will connect to the tunnel
 ```bash
 wg-quick up wg0
 ```
-- You should be able to ping VM-B from VM-A with its CIDR
+- Inspect wireguard info with wg
+
+![wg](/images/wg.png)
+
+- You should be able to ping VM-B from VM-A with its tunnel ip
+
 ```bash
 ping 10.0.0.2
 ```
+
+![wg-ping](/images/wg-ping.png)
 Authors: Kosti Kangasmaa and Jouni Tuomela
 
 ## Allow vm-a to connect to vm-b
@@ -234,10 +241,11 @@ kubectl --context kind-cluster-a label node cluster-a-worker submariner.io/gatew
 subctl deploy-broker
 ```
 -   Next we join cluster-a to the broker with brokerfile
+
 ```bash
  subctl join broker-info.subm --context kind-cluster-a --clusterid vm-a --cable-driver wireguard
 ```
-
+![subctl join vm-a](/images/subctl-join-vm-a.png)
 - We can look up info and diagnostics about our submariner with the commands
 ```bash
 subctl show all
@@ -297,8 +305,13 @@ subctl join broker-info.subm --context kind-cluster-b --clusterid vm-b --cable-d
 
 ```bash
 subctl show all
+```
+![subctl show all](/images/subctl-show-all-vm-a.png)
+
+```bash
 subctl diagnose all
 ```
+![subctl diagnose all](/images/subctl-diagnose-all-vm-a.png)
 
 Now the connections should be up and running.
 
