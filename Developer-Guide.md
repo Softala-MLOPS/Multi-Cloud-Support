@@ -154,6 +154,7 @@ passwd: password updated successfully
 ```bash
 cd /etc/ssh/sshd_config.d
   ```
+![wg-ping](/images/navigate.png)
 - Edit the cloud image configuration file:
 ```bash
  nano 60-cloudimg-settings.conf
@@ -162,6 +163,7 @@ cd /etc/ssh/sshd_config.d
 ```bash
 PasswordAuthentication yes
   ```
+![wg-ping](/images/password_authentiction.png)
 - This overrides the default cPouta settings (which diables password logins for security reasons)
 #### Restart SSH service
 ```bash 
