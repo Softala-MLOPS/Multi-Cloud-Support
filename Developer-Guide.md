@@ -191,6 +191,7 @@ scp <file> <username>@<vm-b-ip>:<destination>
 
 - In production systems, prefer SSH key-based authentication for security.
 
+Author: Jouni Tuomela
 
 ## Submariner sandbox with Wireguard that submariner handles with 2 different Vm´s on Openstack
 Start by installing required technology stack, this demo has been done on versions stated below.
