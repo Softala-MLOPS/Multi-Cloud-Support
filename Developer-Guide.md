@@ -117,6 +117,60 @@ ping 10.0.0.2
 ```
 Authors: Kosti Kangasmaa and Jouni Tuomela
 
+## Allow vm-a to connect to vm-b
+These instructions are meant only for CSC's cPouta virtual machines.
+
+They configure vm-b to accept SCP connection from vm-a using password authentication insted of SSH keys.
+
+#### Switch to root user on vm-b
+```bash
+sudo -i
+  ```
+- You’ll enter the root shell to perform system-level changes.
+
+#### Create a new user for SSH/SCP access
+```bash
+sudo adduser <username>
+  ```
+- Ubuntu will prompt you to set and confirm a password.
+
+- After that, it will ask for optional user information — just press Enter to skip.
+
+- Finally, confirm with Y when asked if the information is correct.
+
+- You should see:
+```
+passwd: password updated successfully
+```
+#### Enable password authentication for SSH
+- Navigate to SSH configuration directory:
+```bash
+cd /etc/ssh/sshd_config.d
+  ```
+- Edit the cloud image configuration file:
+```bash
+ nano 60-cloudimg-settings.conf
+  ```
+- Change its contents to:
+```bash
+PasswordAuthentication yes
+  ```
+- This overrides the default cPouta settings (which diables password logins for security reasons)
+#### Restart SSH service
+```bash 
+systemctl restart ssh
+  ```
+#### Result
+- Now vm-a can connect to vm-b using SCP or SSH with the credential of the newly created user:
+```bash
+scp <file> <username>@<vm-b-ip>:<destination>
+  ```
+#### Security note
+- Password authentication should be enabled only for internal testing or controlled environments like cPouta VMs.
+
+- In production systems, prefer SSH key-based authentication for security.
+
+
 ## Submariner sandbox with Wireguard that submariner handles with 2 different Vm´s on Openstack
 Start by installing required technology stack, this demo has been done on versions stated below.
   
