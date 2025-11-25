@@ -331,3 +331,315 @@ subctl diagnose all
 Now the connections should be up and running.
 
 Author: Kosti Kangasmaa
+
+---
+
+## Developer Guide 2.0
+
+### Environment
+
+#### Development Environment n.1
+
+Two Kubernetes clusters running on separate physical machines:
+
+* **Cluster A** → OpenStack VM (CSC cPouta)
+* **Cluster B** → GPU VM (Datacrunch)
+
+Both running:
+
+* **Ubuntu 24.04 LTS**
+* **K3s (lightweight Kubernetes distribution)**
+* **Kubernetes v1.33.x (via K3s installer)**
+* **kubectl client**
+* **Liqo 1.0.1** for multicluster peering
+* **WireGuard (automatically managed by Liqo)**
+* **NVIDIA GPU + nvidia-device-plugin** *(Cluster B only)*
+
+VM specs (recommended):
+
+| Component | Cluster A | Cluster B  |
+| --------- | --------- | ---------- |
+| RAM       | 32 GB     | 23–32 GB   |
+| vCPUs     | 8         | 6–16       |
+| Disk      | 80 GB     | 50–100 GB  |
+| GPU       | No        | Tesla V100 |
+| Network   | Public IP | Public IP  |
+
+---
+
+### API Requirements
+
+* Kubernetes API access for both clusters
+* kubeconfig available for Cluster A and Cluster B
+* kubectl installed on the operator machine
+* liqoctl installed on the operator machine
+
+---
+
+### Technology Stack
+
+* **K3s** (Kubernetes distribution used for both clusters)
+* **kubectl** (cluster management)
+* **liqoctl** (multicluster networking + scheduling)
+* **Helm** *(indirectly used by liqoctl)*
+* **WireGuard (built-in)** – created automatically by Liqo for cross-cluster VPN
+* **Containerd (via K3s)** – default runtime
+* **Docker (optional)** – only needed for building container images
+* **NVIDIA GPU + nvidia-device-plugin** (Cluster B only)
+
+---
+
+# 🚀 **Liqo Multicluster Peering Guide (CSC → Datacrunch)**
+
+### *Complete Developer Setup Using mlops-vm(Cpouta) + weak-mind-unfolds-fin-01(Datacrunch)*
+
+This guide documents the exact steps we used to successfully create a **working Liqo multicluster environment**, linking:
+
+* **Cluster A (CSC)** → *consumer*
+  Host: `mlops-vm`
+
+* **Cluster B (Datacrunch)** → *provider*
+  Host: `weak-mind-unfolds-fin-01` (GPU V100)
+
+The final result:
+Cluster A can schedule pods onto Cluster B seamlessly through the Liqo virtual node.
+
+---
+
+# 1. ⚙️ Architecture Overview
+
+```
++---------------------+             +---------------------------+
+|   Cluster A (CSC)   |             |  Cluster B (Datacrunch)   |
+|   mlops-vm          |             |  weak-mind-unfolds-fin-01 |
+|   k3s master        |   Liqo      |  k3s master + GPU V100    |
+|   consumer mode     | <---------> |  provider mode            |
++---------------------+   VPN WG    +---------------------------+
+
+Cluster A sees Cluster B as:
+  Node name: cluster-b
+  Type: liqo virtual-node
+```
+
+---
+
+# 2. 📦 Install k3s on Each Cluster
+
+## **Cluster A (CSC / mlops-vm)**
+
+```bash
+curl -sfL https://get.k3s.io | sh -
+```
+
+Export kubeconfig to your user:
+
+```bash
+sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config
+```
+
+---
+
+## **Cluster B (Datacrunch / weak-mind-unfolds-fin-01)**
+
+```bash
+curl -sfL https://get.k3s.io | sh -
+```
+
+Export kubeconfig:
+
+```bash
+sudo cat /etc/rancher/k3s/k3s.yaml > ~/cluster-b.yaml
+chmod 600 ~/cluster-b.yaml
+```
+
+---
+
+# 3. 📥 Install liqoctl (manual method)
+
+On **both clusters**:
+
+```bash
+curl --fail -LS \
+  "https://github.com/liqotech/liqo/releases/download/v1.0.1/liqoctl-linux-amd64.tar.gz" \
+  | tar -xz
+
+sudo install -o root -g root -m 0755 liqoctl /usr/local/bin/liqoctl
+```
+
+Verify:
+
+```bash
+liqoctl version
+```
+
+Expected:
+
+```
+Client version: v1.0.1
+Server version: Unknown
+```
+
+(Server version appears after installing Liqo.)
+
+---
+
+# 4. 🛰 Install Liqo
+
+## **Cluster A (consumer)**
+
+```bash
+liqoctl install k3s --cluster-id cluster-a
+```
+
+## **Cluster B (provider)**
+
+```bash
+liqoctl install k3s --cluster-id cluster-b
+```
+
+---
+
+# 5. 🔑 Transfer Cluster B Kubeconfig to Cluster A
+
+Inside **Cluster B**:
+
+```bash
+python3 -m http.server 8080
+```
+
+Output:
+
+```
+Serving HTTP on 0.0.0.0 port 8080...
+```
+
+From **Cluster A**:
+
+```bash
+wget http://<dc-ip>:8080/cluster-b.yaml -O cluster-b.yaml
+```
+
+Datacrunch VM IP example:
+
+```
+135.181.8.194
+```
+
+Verify:
+
+```bash
+ls -l cluster-b.yaml
+```
+
+---
+
+# 6. 🌐 Fix certificate validation (tested OK)
+
+Check access from Cluster A:
+
+```bash
+kubectl --kubeconfig cluster-b.yaml get nodes
+```
+
+If nodes appear → certificates OK.
+
+---
+
+# 7. 🔗 Establish Liqo Peering (MOST IMPORTANT STEP)
+
+On **Cluster A:**
+
+```bash
+liqoctl peer \
+  --kubeconfig cluster-a.yaml \
+  --remote-kubeconfig cluster-b.yaml
+```
+
+Expected successful output:
+
+```
+Network configuration correctly set up
+Gateway server correctly set up
+Connection is established
+Tenant applied
+Identity generated
+ResourceSlice resources: Accepted
+```
+
+---
+
+# 8. ✔️ Validate Peering
+
+```bash
+kubectl --kubeconfig cluster-a.yaml get nodes
+```
+
+Expected:
+
+```
+NAME        STATUS   ROLES                  VERSION
+cluster-b   Ready    agent                  v1.33.6+k3s1
+mlops-vm    Ready    control-plane,master   v1.33.6+k3s1
+```
+
+`cluster-b` is the **virtual node** representing the Datacrunch cluster.
+
+---
+
+# 9. 🧪 **Test Pod Scheduling to Cluster B**
+
+Liqo requires namespaces to be *offloaded* before pods can be scheduled onto remote virtual nodes.
+Without offloading, the Liqo virtual node has a protective taint:
+
+```
+virtual-node.liqo.io/not-allowed=true:NoExecute
+```
+
+This prevents workloads from running remotely.
+
+---
+
+## **Step 1 — Enable namespace offloading**
+
+On Cluster A:
+
+```bash
+liqoctl offload namespace default --kubeconfig cluster-a.yaml
+```
+
+This:
+
+* Enables cross-cluster pod scheduling
+* Creates a twin namespace on Cluster B
+* Removes the protective virtual-node taint
+* Activates resource reflection
+* Enables automatic offloading of pods
+
+---
+
+## **Step 2 — Run a test workload**
+
+```bash
+kubectl --kubeconfig cluster-a.yaml run test --image=nginx
+```
+
+---
+
+## **Step 3 — Verify that the pod runs on Cluster B**
+
+```bash
+kubectl --kubeconfig cluster-a.yaml get pods -o wide
+```
+
+Expected output:
+
+```
+NAME   READY   STATUS    IP           NODE
+test   1/1     Running   10.40.0.18   cluster-b
+```
+
+`cluster-b` is the **Liqo virtual node**, meaning the workload is actually running on the Datacrunch machine (`weak-mind-unfolds-fin-01`).
+
+This confirms Liqo peering, scheduling, and tunneling are all functioning correctly.
+
+Author: Ike Aniebonam
