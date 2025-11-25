@@ -365,17 +365,13 @@ VM specs (recommended):
 | GPU       | No        | Tesla V100 |
 | Network   | Public IP | Public IP  |
 
----
-
 ### API Requirements
 
 * Kubernetes API access for both clusters
 * kubeconfig available for Cluster A and Cluster B
 * kubectl installed on the operator machine
 * liqoctl installed on the operator machine
-
----
-
+  
 ### Technology Stack
 
 * **K3s** (Kubernetes distribution used for both clusters)
@@ -386,8 +382,6 @@ VM specs (recommended):
 * **Containerd (via K3s)** – default runtime
 * **Docker (optional)** – only needed for building container images
 * **NVIDIA GPU + nvidia-device-plugin** (Cluster B only)
-
----
 
 # 🚀 **Liqo Multicluster Peering Guide (CSC → Datacrunch)**
 
@@ -404,8 +398,6 @@ This guide documents the exact steps we used to successfully create a **working 
 The final result:
 Cluster A can schedule pods onto Cluster B seamlessly through the Liqo virtual node.
 
----
-
 # 1. ⚙️ Architecture Overview
 
 ```
@@ -421,8 +413,6 @@ Cluster A sees Cluster B as:
   Type: liqo virtual-node
 ```
 
----
-
 # 2. 📦 Install k3s on Each Cluster
 
 ## **Cluster A (CSC / mlops-vm)**
@@ -437,8 +427,6 @@ Export kubeconfig to your user:
 sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config
 ```
 
----
-
 ## **Cluster B (Datacrunch / weak-mind-unfolds-fin-01)**
 
 ```bash
@@ -451,8 +439,6 @@ Export kubeconfig:
 sudo cat /etc/rancher/k3s/k3s.yaml > ~/cluster-b.yaml
 chmod 600 ~/cluster-b.yaml
 ```
-
----
 
 # 3. 📥 Install liqoctl (manual method)
 
@@ -481,8 +467,6 @@ Server version: Unknown
 
 (Server version appears after installing Liqo.)
 
----
-
 # 4. 🛰 Install Liqo
 
 ## **Cluster A (consumer)**
@@ -496,8 +480,6 @@ liqoctl install k3s --cluster-id cluster-a
 ```bash
 liqoctl install k3s --cluster-id cluster-b
 ```
-
----
 
 # 5. 🔑 Transfer Cluster B Kubeconfig to Cluster A
 
@@ -531,8 +513,6 @@ Verify:
 ls -l cluster-b.yaml
 ```
 
----
-
 # 6. 🌐 Fix certificate validation (tested OK)
 
 Check access from Cluster A:
@@ -542,8 +522,6 @@ kubectl --kubeconfig cluster-b.yaml get nodes
 ```
 
 If nodes appear → certificates OK.
-
----
 
 # 7. 🔗 Establish Liqo Peering (MOST IMPORTANT STEP)
 
@@ -566,8 +544,6 @@ Identity generated
 ResourceSlice resources: Accepted
 ```
 
----
-
 # 8. ✔️ Validate Peering
 
 ```bash
@@ -584,8 +560,6 @@ mlops-vm    Ready    control-plane,master   v1.33.6+k3s1
 
 `cluster-b` is the **virtual node** representing the Datacrunch cluster.
 
----
-
 # 9. 🧪 **Test Pod Scheduling to Cluster B**
 
 Liqo requires namespaces to be *offloaded* before pods can be scheduled onto remote virtual nodes.
@@ -596,8 +570,6 @@ virtual-node.liqo.io/not-allowed=true:NoExecute
 ```
 
 This prevents workloads from running remotely.
-
----
 
 ## **Step 1 — Enable namespace offloading**
 
@@ -615,15 +587,11 @@ This:
 * Activates resource reflection
 * Enables automatic offloading of pods
 
----
-
 ## **Step 2 — Run a test workload**
 
 ```bash
 kubectl --kubeconfig cluster-a.yaml run test --image=nginx
 ```
-
----
 
 ## **Step 3 — Verify that the pod runs on Cluster B**
 
@@ -643,3 +611,5 @@ test   1/1     Running   10.40.0.18   cluster-b
 This confirms Liqo peering, scheduling, and tunneling are all functioning correctly.
 
 Author: Ike Aniebonam
+
+---
