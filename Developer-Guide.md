@@ -518,8 +518,6 @@ ls -l cluster-b.yaml
 
 ## 6. Fix certificate validation (Rewrite server IP in cluster-b.yaml)
 
-*(THIS is where your missing block is inserted — perfect location)*
-
 On **Cluster A**, open:
 
 ```bash
