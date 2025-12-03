@@ -341,6 +341,7 @@ Author: Kosti Kangasmaa
 
 ## StartUp Script with Submarine on DataCrunch
 ![StartUpScript FlowChart](/images/FlowChartDC_Startup25new.png)
+
 Check code: [startup script with submarine](./Scripts/ClusterSetupDC.sh)!
 
 Current version does not support logs, but you can check that everything gets installed with:
