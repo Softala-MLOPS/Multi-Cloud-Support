@@ -339,4 +339,26 @@ Now the connections should be up and running.
 
 Author: Kosti Kangasmaa
 
+## StartUp Script with Submarine on DataCrunch
+![StartUpScript FlowChart](/images/FlowChartDC_Startup25new.png)
+Check code: [startup script with submarine](./Scripts/ClusterSetupDC.sh)!
+
+Current version does not support logs, but you can check that everything gets installed with:
+```bash
+echo -e "\n====== [1] SCRIPT MARKER ======"; \
+if [ -f /var/lib/datacrunch-start.done ]; then echo "Startup script marker found"; else echo "Marker missing"; fi; \
+echo -e "\n====== [2] WIREGUARD ======"; \
+if command -v wg >/dev/null 2>&1; then echo "wg version: $(wg --version 2>/dev/null)"; sudo systemctl --no-pager status wg-quick@wg0 2>/dev/null | grep -E "Active|Loaded" || true; echo; sudo wg show || echo "No wg interface running"; else echo "wg not installed"; fi; \
+echo -e "\n====== [3] DOCKER ======"; \
+if command -v docker >/dev/null 2>&1; then docker --version; docker info --format 'CgroupDriver={{.CgroupDriver}}  Runtimes={{.Runtimes}}'; else echo "docker not installed"; fi; \
+echo -e "\n====== [4] K3S / KUBERNETES ======"; \
+if systemctl list-units --type=service | grep -q k3s; then sudo systemctl is-active k3s >/dev/null && echo "k3s service active" || echo "k3s service inactive"; sudo k3s kubectl get nodes -o wide 2>/dev/null || sudo kubectl get nodes -o wide 2>/dev/null || echo "kubectl not available"; else echo "k3s not installed"; fi; \
+echo -e "\n====== [5] SUBMARINER ======"; \
+if command -v subctl >/dev/null 2>&1; then echo "subctl version: $(subctl version 2>/dev/null)"; sudo subctl show all 2>/dev/null || echo "No broker joined yet"; else echo "Submariner not installed (expected if no broker file)"; fi; \
+echo -e "\n====== [6] SUMMARY ======"; \
+ip a show wg0 2>/dev/null | grep inet || echo "No wg0 address"; \
+sudo kubectl get pods -A 2>/dev/null | head -10 || sudo k3s kubectl get pods -A 2>/dev/null | head -10 || echo "No pods listed"; \
+echo -e "\n Diagnostics complete."
+```
+
 ---
