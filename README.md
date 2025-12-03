@@ -15,6 +15,10 @@ See the [Developer Guide](Developer-Guide.md) for detailed setup and usage instr
 
 See the [Future backlog](Future-Backlog.md) for projects next steps.
 
+## Investigations and tests for alternative solutions
+
+See the [Failed investigations](Failed-Investigations.md) for other solutions we have researched during the project.
+
 
     
     
