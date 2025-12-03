@@ -643,4 +643,7 @@ Now the connections should be up and running.
 
 Author: Kosti Kangasmaa
 
+## StartUp Script with Submarine on DataCrunch
+![StartUpScript FlowChart](/images/FlowChartDC_Startup50.png)
+
 ---
