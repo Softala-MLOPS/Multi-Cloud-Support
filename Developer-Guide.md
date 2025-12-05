@@ -58,7 +58,7 @@ Complete Developer Setup Using:
 Final result:
 Cluster A **can schedule pods** onto Cluster B **seamlessly**, through the Liqo virtual node.
 
-## 1. ⚙️ Architecture Overview
+## 1. Architecture Overview
 
 ```
 +---------------------+             +---------------------------+
@@ -135,7 +135,7 @@ Server version: Unknown
 
 (Server version appears after installing Liqo.)
 
-## 4. 🛰 Install Liqo
+## 4. Install Liqo
 
 ### Cluster A (consumer)
 
