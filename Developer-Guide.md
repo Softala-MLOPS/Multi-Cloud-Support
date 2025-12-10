@@ -293,5 +293,25 @@ This confirms:
 
 **Brown Ikechukwu Aniebonam**
 
+## SSH Connnection for DataCrunch
+
+#### Projects > Keys > SSH KEYS > +Create
+
+If you want to use a visual desktop interface, you can find guide here:
+https://docs.verda.com/cpu-and-gpu-instances/remote-desktop-access
+
+## Move Images between MyCSC Projects
+Image sharing between projects is currently not supported using the Pouta web interface. However sharing can be done by using OpenStack CLI and OpenStack RC File that is found inside project API Access. Links below helps to install and use CLI:  
+https://docs.csc.fi/cloud/pouta/install-client/
+
+"Sharing images between Pouta projects" at bottom of the web page:  
+https://docs.csc.fi/cloud/pouta/adding-images/#sharing-images-between-pouta-projects
+
+#### !!NOTE: OpenStack CLI does not give you any responds from invalid logins or most commands!!
+
+### Author
+
+**Eemil Airaksinen**
+
 ---
 
