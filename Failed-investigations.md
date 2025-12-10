@@ -362,4 +362,8 @@ sudo kubectl get pods -A 2>/dev/null | head -10 || sudo k3s kubectl get pods -A 
 echo -e "\n Diagnostics complete."
 ```
 
+### Author
+
+**Eemil Airaksinen**
+
 ---
