@@ -366,23 +366,37 @@ kubectl get pods --all-namespaces -o wide
 ### Chart created by
 
 **Jouni Tuomela**
-
   
-## SSH Connnection for Verda
+## Create and set up instance on Verda manually
 
-#### Projects > Keys > SSH KEYS > +Create
+ 1. Set up SSH-keys for SSH Connection between Verda and your local machine (to debug and work manually):  
+ **Project page (Cloud Project) > Keys > SSH KEYS > +Create**
+ 2. Create Instance:   
+    - Project page (Cloud Project) > Instances > +Create Instance
+    - On-Demand or Spot > Pay As You Go > CPU Node (for testing) or lowest hourly price with least possible GPUs
+    - Fixed pricing > Closest location (fin) > Ubuntu 24.04 (or use same version on both clusters) + latest CUDA + Docker + 50GB
+    - SSH Keys > Add your keys
+    - Startup script > Add a new script (find latest working script from here): https://github.com/Softala-MLOPS/Multi-Cloud-Support/blob/main/Scripts/scripts.md
+    - Deploy now
+ 3. Usually it will take up to 3 minutes for instance to deploy. After you see it running, you can find info for SSH connection from settings of instance and you can use same user than you did setup on SSH-KEYS.
 
-If you want to use a visual desktop interface, you can find guide here:
+_If you want to use a visual desktop interface, you can find guide here:_
 https://docs.verda.com/cpu-and-gpu-instances/remote-desktop-access
 
-## Move Images between MyCSC Projects
-Image sharing between projects is currently not supported using the Pouta web interface. However sharing can be done by using OpenStack CLI and OpenStack RC File that is found inside project API Access. Links below helps to install and use CLI:  
+## Image sharing on MyCSC
+
+### Image sharing between cPouta projects
+Image sharing between projects is currently not supported using the Pouta web interface. However sharing can be done by using OpenStack CLI and OpenStack RC File that is found inside project API Access. Using Python virtual environment is recommended. Links below helps to install and use CLI:  
 https://docs.csc.fi/cloud/pouta/install-client/
 
 "Sharing images between Pouta projects" at bottom of the web page:  
 https://docs.csc.fi/cloud/pouta/adding-images/#sharing-images-between-pouta-projects
 
-#### !!NOTE: OpenStack CLI does not give you any responds from invalid logins or most commands!!
+### Image download to cPouta project
+If you don't want to start fresh, you can try to use current state of mlops-pouta image found from teams WT 25H2 - MULTI-CLOUD SUPPORT shared files and use it on your cPouta project:   
+**Project > Compute > Images > + Create Image**
+
+#### !!NOTE: OpenStack CLI does not give you any responses from invalid logins or most commands!!
 
 ### Author(s)
 
