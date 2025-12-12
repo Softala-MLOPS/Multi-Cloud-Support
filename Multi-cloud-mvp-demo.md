@@ -62,34 +62,65 @@ Cluster A **can schedule pods** onto Cluster B **seamlessly**, through the Liqo 
 
 
 ## 2. Install k3s on Each Cluster
-
-### **Cluster A (CSC / mlops-vm)**
-
+## 2. Kubernetes Setup for OSS-MLops-Platform and Verda
+ 
+### **Consumer Cluster (kind-mlops-platform / Cpouta-vm)**
+ 
+Only requirement is that the OSS-MLOps Platform repository is cloned and installed correctly.
+ 
+Install reference: https://github.com/OSS-MLOPS-PLATFORM/oss-mlops-platform/blob/main/tools/CLI-tool/Installations%2C%20setups%20and%20usage.md
+ 
+### **Provider Cluster (cluster-b / Verda-vm)**
+ 
+Update system packages:
+ 
+```bash
+apt update
+```
+ 
+Install Python and pip (required by OSS-MLOps Platform)
+ 
+```bash
+apt install -y python3 python3-pip
+```
+ 
+Verify:
+ 
+```bash
+python3 --version
+pip3 --version
+```
+ 
+Download and install kustomize:
+ 
+```bash
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- 5.2.1
+v5.2.1
+chmod +x ./kustomize
+mv ./kustomize /usr/local/bin/kustomize
+```
+ 
+Verify:
+ 
+```bash
+kustomize version
+```
+ 
+Install k3s:
+ 
 ```bash
 curl -sfL https://get.k3s.io | sh -
 ```
-
-Export kubeconfig to your user:
-
-```bash
-sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config
-```
-
-### **Cluster B (Datacrunch / weak-mind-unfolds-fin-01)**
-
-```bash
-curl -sfL https://get.k3s.io | sh -
-```
-
+ 
 Export kubeconfig:
-
+ 
 ```bash
 sudo cat /etc/rancher/k3s/k3s.yaml > ~/cluster-b.yaml
 chmod 600 ~/cluster-b.yaml
 ```
-
+ 
 Prepare kubectl directory:
-
+ 
 ```bash
 mkdir -p /root/.kube
 sudo cat /etc/rancher/k3s/k3s.yaml > /root/.kube/config
@@ -122,23 +153,26 @@ Server version: Unknown
 
 (Server version appears after installing Liqo.)
 
-## 4. Install Liqo
+## 4. Install Liqo on both clusters
 
-### Cluster A (consumer)
+### Oss-mlops-platform (consumer)
 
 ```bash
-liqoctl install k3s --cluster-id cluster-a
+liqoctl install kind --cluster-id oss-mlops-platform
 ```
 
-### Cluster B (provider)
+### Cluster-b (provider)
 
 ```bash
 liqoctl install k3s --cluster-id cluster-b
 ```
 
-## 5. Transfer Cluster B Kubeconfig to Cluster A
 
-On **Cluster B**:
+
+## 5. Transfer Cluster-b Kubeconfig to Oss-mlops-platform
+In this case we serve it via http.server, but it can be transfered with SCP for example.
+
+On **Cluster-b**:
 
 ```bash
 python3 -m http.server 8080
@@ -150,10 +184,12 @@ Output:
 Serving HTTP on 0.0.0.0 port 8080...
 ```
 
-On **Cluster A**:
+On **Oss-mlops-platform**:
+
+Download the kubeconfig
 
 ```bash
-wget http://<dc-ip>:8080/cluster-b.yaml -O cluster-b.yaml
+wget http://<Cluster-b-public-ip>:8080/cluster-b.yaml -O cluster-b.yaml
 ```
 
 For example:
@@ -170,26 +206,19 @@ ls -l cluster-b.yaml
 
 ## 6. Fix certificate validation (Rewrite server IP in cluster-b.yaml)
 
-On **Cluster A**, open:
+On **Oss-mlops-platform**, modify cluster-b.yaml
 
 ```bash
 nano cluster-b.yaml
 ```
 
-Find:
+
+Change server address to:
 
 ```
-server: https://10.xxx.xxx.xxx:6443
+server: https://<Cluster-b-public-ip>:6443
 ```
 
-Change to:
-
-```
-server: https://135.181.8.194:6443
-```
-
-**Do NOT modify certificate-authority-data**
-TLS will still validate correctly.
 
 Verify connection:
 
@@ -199,7 +228,7 @@ kubectl --kubeconfig cluster-b.yaml get nodes
 
 If nodes appear → **certificates OK**.
 
-## 7. Establish Liqo Peering (MOST IMPORTANT STEP)
+## 7. Establish Liqo Peering 
 
 On Cluster A:
 
@@ -230,16 +259,16 @@ cluster-b   Ready    agent
 mlops-vm    Ready    control-plane
 ```
 
-## 9. Test Pod Scheduling to Cluster B
+## 9. Pod Scheduling to Cluster-b
 
-Liqo requires namespaces to be offloaded before scheduling.
+Liqo requires namespaces to be offloaded before scheduling. Mlops platform schedules training workloads under kubeflow namespace. Liqo´s default offloading strategy is **LocalAndRemote** which schedules future pods in the node in said namespace that has most recources available.
 
 ### Step 1 — Offload namespace
 
-On Cluster A:
+On Oss-mlops-platform:
 
 ```bash
-liqoctl offload namespace default --kubeconfig cluster-a.yaml
+liqoctl offload namespace kubeflow
 ```
 
 This:
@@ -257,24 +286,18 @@ kubectl --kubeconfig cluster-a.yaml run test --image=nginx
 
 ### Step 3 — Verify scheduling
 
+#### On Oss-mlops-platform:
+
 ```bash
-kubectl --kubeconfig cluster-a.yaml get pods -o wide
+kubectl get pods -n kubeflow -o wide
 ```
-
-Expected:
-
-```
-test   1/1   Running   10.40.0.18   cluster-b
+#### On Cluster-b:
+```bash
+kubectl get pods -n kubeflow -o wide
 ```
 
 **cluster-b** = Liqo virtual node on Datacrunch.
 
-This confirms:
-
-* Peering works
-* WireGuard tunnel established
-* Scheduling works
-* Pod is running on V100 GPU cluster
   
 ### Author
 
