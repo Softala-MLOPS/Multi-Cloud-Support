@@ -19,6 +19,24 @@ See the [Future backlog](Future-Backlog.md) for projects next steps.
 
 See the [Failed investigations](Failed-Investigations.md) for other solutions we have researched during the project.
 
+## Verda API and possible usages
+Before you can use REST API:
+ 1. Get Credentials from the Verda Cloud Dashboard
+ 2. Generate Access Token
+More in-depth guidance and about every usage of API:
+https://api.verda.com/v1/docs#description/verda-cloud
+
+Potential API Endpoints for Integration:
+ - Instances
+   - Get instances
+   - Deploy instances
+   - Perform action on instance or multiple instances
+   - Get instance by ID
+ - Instance Availability (if current option is not available)
+
+Setups for SSH and startup scripts can be done via dashboard.
+
+Scaling will be handled on cPouta (cluster A) by deploying and deleting instances (instance needs to be totally removed, or else it will still use credits from project's balance!)
 
     
     
