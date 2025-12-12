@@ -47,6 +47,10 @@ VM specs:
 ## Architecture Overview
 ![mlops_cluste_federation](/images/mlops_cluster_federation.png)
 
+### Chart created by
+
+**Jouni Tuomela**
+
 
 
 # Setup Guide
@@ -319,6 +323,10 @@ kubectl get pods --all-namespaces -o wide
 #### Offloading overview
 
 ![offloading_chart](/images/offloading_chart.png)
+
+### Chart created by
+
+**Jouni Tuomela**
 
   
 ### Author
