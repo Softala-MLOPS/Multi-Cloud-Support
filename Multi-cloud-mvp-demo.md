@@ -316,7 +316,9 @@ kubectl get pods --all-namespaces -o wide
 
 ![kubeflow-verda](/images/kubeflow-verda.png)
 
+#### Offloading overview
 
+![offloading_chart](/images/offloading_chart.png)
 
   
 ### Author
