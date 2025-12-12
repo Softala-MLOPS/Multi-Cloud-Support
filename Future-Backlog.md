@@ -15,4 +15,4 @@
   - Do all created Vm´s have the same time of idle or does the potential idle time scale with somehow with the amount of instances active and idling.
   - Should the shutdown time be easily customizable by mlops user / admin
 * Investigate how to create a safe de-coupling and uninstalling script of the joined clusters to ensure succesful rejoining of clusters. (liqo specific problem).
-* Remote cluster is set up with k3s at the moment. Invetigate if there is need for k8s. If the k3s doesn't have enough resources then modify the insturctions to be compatible with k8s. Liqo can be deployed both k3s and k8s clusters.
+* Remote cluster is set up with k3s at the moment. Investigate if there is need for k8s. If the k3s doesn't have enough resources then modify the instructions to be compatible with k8s. Liqo can be deployed both k3s and k8s clusters.
