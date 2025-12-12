@@ -333,7 +333,7 @@ kubectl get pods --all-namespaces -o wide
 
 **Brown Ikechukwu Aniebonam**
 
-## SSH Connnection for DataCrunch
+## SSH Connnection for Verda
 
 #### Projects > Keys > SSH KEYS > +Create
 

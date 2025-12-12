@@ -339,7 +339,7 @@ Now the connections should be up and running.
 
 Author: Kosti Kangasmaa
 
-## StartUp Script with Submarine on DataCrunch
+## StartUp Script with Submarine on Verda
 ![StartUpScript FlowChart](/images/FlowChartDC_Startup25new.png)
 
 Check code: [startup script with submarine](./Scripts/ClusterSetupDC.sh)!
@@ -347,7 +347,7 @@ Check code: [startup script with submarine](./Scripts/ClusterSetupDC.sh)!
 Current version does not support logs, but you can check that everything gets installed with:
 ```bash
 echo -e "\n====== [1] SCRIPT MARKER ======"; \
-if [ -f /var/lib/datacrunch-start.done ]; then echo "Startup script marker found"; else echo "Marker missing"; fi; \
+if [ -f /var/lib/Verda-start.done ]; then echo "Startup script marker found"; else echo "Marker missing"; fi; \
 echo -e "\n====== [2] WIREGUARD ======"; \
 if command -v wg >/dev/null 2>&1; then echo "wg version: $(wg --version 2>/dev/null)"; sudo systemctl --no-pager status wg-quick@wg0 2>/dev/null | grep -E "Active|Loaded" || true; echo; sudo wg show || echo "No wg interface running"; else echo "wg not installed"; fi; \
 echo -e "\n====== [3] DOCKER ======"; \
