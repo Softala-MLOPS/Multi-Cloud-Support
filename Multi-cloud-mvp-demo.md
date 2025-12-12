@@ -1,54 +1,55 @@
-# Developer Guide
+# Multi-cloud demo
+This is a step-by-step guide for connecting an external k3s cluster to Oss-mlops-platforms k8s cluster running on my CSC cPouta vm. The goal of this demo is to work as an proof of concept for offloading workloads from Oss-mlops-platform ml development pipeline to an external cluster witch is located on seperate VM on a different cloud provider. This is achieved with connecting the two clusters with Liqo. Liqo also handles.
+* Vpn tunnel for intercluster connections.
+* Setup and management of a virtual node.
+* Namespace extending between nodes.
+* Offloading strategy for pods under said namespace.
 
-## Environment
+## Technologies added to Oss-mlops-platform Stack
 
-### Development Environment n.1
-
-Two Kubernetes clusters running on separate physical machines:
-
-* **Cluster A** → OpenStack VM (CSC cPouta)
-* **Cluster B** → GPU VM (Datacrunch)
-* One of the VMs has to have public IP-address. If both of the machines are using NAT(Network Address Translation) the connection can't be established.
-
-Both running:
-
-* Ubuntu 24.04 LTS
-* K3s (lightweight Kubernetes distribution)
-* Kubernetes v1.33.x (via K3s installer)
-* kubectl client
-* Liqo 1.0.1 for multicluster peering
-* WireGuard (automatically managed by Liqo)
-* NVIDIA GPU + nvidia-device-plugin (**Cluster B only**)
-
-VM specs (recommended):
-
-| Component | Cluster A | Cluster B  |
-| --------- | --------- | ---------- |
-| RAM       | 32 GB     | 23–32 GB   |
-| vCPUs     | 8         | 6–16       |
-| Disk      | 80 GB     | 50–100 GB  |
-| GPU       | No        | Tesla V100 |
-| Network   | Public IP | Public IP  |
-
-## API Requirements
-
-* Kubernetes API access for both clusters
-* kubeconfig available for Cluster A and Cluster B
-* kubectl installed on the operator machine
-* liqoctl installed on the operator machine
-
-## Technology Stack
-
-* K3s (Kubernetes distribution used for both clusters)
-* kubectl (cluster management)
+* K3s
+* liqo
 * liqoctl (multicluster networking + scheduling)
 * Helm (indirectly used by liqoctl)
 * WireGuard (built-in) – created automatically by Liqo for cross-cluster VPN
-* Containerd (via K3s) – default runtime
-* Docker (optional) – only needed for building container images
-* NVIDIA GPU + nvidia-device-plugin (Cluster B only)
 
-# Liqo Multicluster Peering Guide (CSC → Datacrunch)
+## Development Environments
+### Key requirement
+* One of the VMs has to have public IP-address. If both of the machines are using NAT(Network Address Translation) the connection can't be established.
+* **My CSC cPouta IS behind NAT**
+### Environment 1. Consumer-Vm  k8s Oss-mlops-platform (My CSC cPouta)
+
+VM specs:
+
+| Component | |
+| --------- | --------- |
+| Cloud provider | my CSC cPouta |
+| RAM       | 32 GB     |
+| vCPUs     | 8         |
+| Disk      | 80 GB     |
+| Network   | Floating IP (NAT) |
+| OS | Ubuntu 24.04 LTS |
+|Kubernetes distribution| k8s kind |
+
+### Environment 2. Provider-Vm k3s cluster-b (Verda)
+VM specs:
+
+| Component | |
+| --------- | --------- |
+| Cloud provider | Verda |
+| RAM       | 64 GB     |
+| vCPUs     | 16         |
+| Disk      | 80 GB     |
+| Network   | Public IP (ipv4) |
+| OS | Ubuntu 24.04 LTS |
+|Kubernetes distribution| k3s |
+
+## Architecture Overview
+
+
+
+
+# Setup Guide
 
 Complete Developer Setup Using:
 
@@ -58,21 +59,7 @@ Complete Developer Setup Using:
 Final result:
 Cluster A **can schedule pods** onto Cluster B **seamlessly**, through the Liqo virtual node.
 
-## 1. Architecture Overview
 
-```
-+---------------------+             +---------------------------+
-|   Cluster A (CSC)   |             |  Cluster B (Datacrunch)   |
-|   mlops-vm          |             |  weak-mind-unfolds-fin-01 |
-|   k3s master        |   Liqo      |  k3s master + GPU V100    |
-|   consumer mode     | <---------> |  provider mode            |
-+---------------------+   VPN WG    +---------------------------+
-```
-
-Cluster A sees Cluster B as:
-
-* Node name: **cluster-b**
-* Type: **liqo virtual-node**
 
 ## 2. Install k3s on Each Cluster
 
