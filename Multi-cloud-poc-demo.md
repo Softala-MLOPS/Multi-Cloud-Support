@@ -293,11 +293,52 @@ This:
 * Removes the Liqo protective taint
 * Enables automatic remote scheduling
 
-### Step 2 — Run test workload
+### Step 2 — Run test workload (Wine Quality / Demo pipeline)
+
+### Install JupyterLab Desktop
+
+First, download and install JupyterLab Desktop to your local machine:
 
 ```bash
-kubectl --kubeconfig cluster-a.yaml run test --image=nginx
+https://github.com/jupyterlab/jupyterlab-desktop
 ```
+
+### Port-forward Kubeflow and MLflow services
+
+Run in terminal window:
+
+```bash
+kubectl -n mlflow port-forward svc/mlflow 5000:5000
+```
+Open a new terminal window and run:
+
+```bash
+kubectl -n kubeflow port-forward svc/ml-pipeline-ui 8080:80
+```
+After this step you should be able to connect to the Kubeflow interface from http://localhost:8080/
+
+More info on port-forwarding:
+
+```bash
+https://github.com/OSS-MLOPS-PLATFORM/oss-mlops-platform/blob/main/tools/CLI-tool/Installations%2C%20setups%20and%20usage.md
+```
+
+### Clone the OSS MLOps Platform repository
+
+Clone the repository that contains the demo:
+
+```bash
+git clone https://github.com/OSS-MLOPS-PLATFORM/oss-mlops-platform.git
+```
+Open the cloned oss-mlops-platform folder directly in JupyterLab Desktop.
+
+Once opened:
+
+* Restart the kernel
+
+* Ensure the correct Python environment is selected
+
+You can now test the cluster by running the demo pipeline notebook.
 
 ### Step 3 — Verify scheduling
 
