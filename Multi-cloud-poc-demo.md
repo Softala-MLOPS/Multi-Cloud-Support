@@ -165,7 +165,7 @@ kubectl cluster-info dump | grep -m1 -E "service-cluster-ip-range|serviceSubnet"
 ![get-cidrs](/images/kubectl-get-CIDR.png)
 
 ```bash
-liqoctl install kind --cluster-id kind-mlops-platform --pod-cidr 10.244.0.0/24 --service-cidr 10.96.0.0/16
+liqoctl install --cluster-id kind-mlops-platform --pod-cidr 10.244.0.0/24 --service-cidr 10.96.0.0/16
 ```
 
 ![liqoctl-install-mlops](/images/liqoctl-install-mlops-platform.png)
