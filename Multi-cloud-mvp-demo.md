@@ -45,24 +45,17 @@ VM specs:
 |Kubernetes distribution| k3s |
 
 ## Architecture Overview
-
+![mlops_cluste_federation](/images/mlops_cluster_federation.png)
 
 
 
 # Setup Guide
 
-Complete Developer Setup Using:
-
-* **mlops-vm (CSC)** → Cluster A
-* **weak-mind-unfolds-fin-01 (Datacrunch)** → Cluster B (GPU V100)
-
-Final result:
-Cluster A **can schedule pods** onto Cluster B **seamlessly**, through the Liqo virtual node.
 
 
 
-## 2. Install k3s on Each Cluster
-## 2. Kubernetes Setup for OSS-MLops-Platform and Verda
+
+## 1. Kubernetes Setup for OSS-MLops-Platform and Verda
  
 ### **Consumer Cluster (kind-mlops-platform / Cpouta-vm)**
  
@@ -126,9 +119,9 @@ mkdir -p /root/.kube
 sudo cat /etc/rancher/k3s/k3s.yaml > /root/.kube/config
 ```
 
-## 3. Install liqoctl (manual method)
+## 2. Install liqoctl
 
-On BOTH clusters:
+On BOTH Vm´s:
 
 ```bash
 curl --fail -LS \
@@ -153,13 +146,32 @@ Server version: Unknown
 
 (Server version appears after installing Liqo.)
 
-## 4. Install Liqo on both clusters
+## 3. Install Liqo on both clusters
 
 ### Oss-mlops-platform (consumer)
 
+Get Oss-mlops-platfor specific CIDRs
 ```bash
-liqoctl install kind --cluster-id oss-mlops-platform
+kubectl get nodes -o jsonpath='{.items[0].spec.podCIDR}'
+echo
 ```
+```bash 
+kubectl cluster-info dump | grep -m1 -E "service-cluster-ip-range|serviceSubnet"
+```
+![get-cidrs](/images/kubectl-get-CIDR.png)
+
+```bash
+liqoctl install kind --cluster-id kind-mlops-platform --pod-cidr 10.244.0.0/24 --service-cidr 10.96.0.0/16
+```
+
+![liqoctl-install-mlops](/images/liqoctl-install-mlops-platform.png)
+
+Verify with liqoctl info:
+```bash
+liqoctl info
+```
+
+![liqoctl-info-mlops-platform](/images/liqoctl-info-mlops-platform.png)
 
 ### Cluster-b (provider)
 
@@ -169,7 +181,7 @@ liqoctl install k3s --cluster-id cluster-b
 
 
 
-## 5. Transfer Cluster-b Kubeconfig to Oss-mlops-platform
+## 4. Transfer Cluster-b Kubeconfig to Oss-mlops-platform
 In this case we serve it via http.server, but it can be transfered with SCP for example.
 
 On **Cluster-b**:
@@ -192,10 +204,10 @@ Download the kubeconfig
 wget http://<Cluster-b-public-ip>:8080/cluster-b.yaml -O cluster-b.yaml
 ```
 
-For example:
+For example in our case:
 
 ```
-135.181.8.194
+86.38.238.14
 ```
 
 Verify:
@@ -204,7 +216,7 @@ Verify:
 ls -l cluster-b.yaml
 ```
 
-## 6. Fix certificate validation (Rewrite server IP in cluster-b.yaml)
+## 5. Fix certificate validation (Rewrite server IP in cluster-b.yaml)
 
 On **Oss-mlops-platform**, modify cluster-b.yaml
 
@@ -213,53 +225,52 @@ nano cluster-b.yaml
 ```
 
 
+
+
 Change server address to:
 
 ```
 server: https://<Cluster-b-public-ip>:6443
 ```
-
+![cluster-b](/images/cluster-b-yaml.png)
 
 Verify connection:
 
 ```bash
 kubectl --kubeconfig cluster-b.yaml get nodes
 ```
+![kubectl-verify](/images/kubectl-get-nodes-verify.png)
 
 If nodes appear → **certificates OK**.
 
-## 7. Establish Liqo Peering 
+## 6. Establish Liqo Peering 
 
-On Cluster A:
+On Oss-mlops-platform:
 
 ```bash
 liqoctl peer \
-  --kubeconfig cluster-a.yaml \
+  --kubeconfig ~/.kube/config \
   --remote-kubeconfig cluster-b.yaml
 ```
 
-Expected output includes:
+![liqoctl-peer](/images/liqoctl-peer.png)
 
-* Connection is established
-* Tenant applied
-* Identity generated
-* ResourceSlice resources: Accepted
 
-## 8. Validate Peering
 
+### Validate Peering on both Vm´s
 ```bash
-kubectl --kubeconfig cluster-a.yaml get nodes
+liqoctl info
 ```
 
-Expected:
 
-```
-NAME        STATUS   ROLES
-cluster-b   Ready    agent
-mlops-vm    Ready    control-plane
-```
 
-## 9. Pod Scheduling to Cluster-b
+![liqoctl-peering](/images/liqoctl-info-peering-mlops.png)
+
+
+![liqoctl-peering](/images/liqoctl-info-peering-verda.png)
+
+
+## 7. Pod Scheduling to Cluster-b
 
 Liqo requires namespaces to be offloaded before scheduling. Mlops platform schedules training workloads under kubeflow namespace. Liqo´s default offloading strategy is **LocalAndRemote** which schedules future pods in the node in said namespace that has most recources available.
 
@@ -291,12 +302,21 @@ kubectl --kubeconfig cluster-a.yaml run test --image=nginx
 ```bash
 kubectl get pods -n kubeflow -o wide
 ```
+
+![kubeflow-mlops](/images/kubeflow-mlops-o-wide.png)
+
+We now can see that a new pod under the namespace kubeflow was scheduled on cluster-b, but unfortunately the pod started but failed to complete due to errors. This is still a proof of concept of succesfull pod offloading in namespaces over virtual nodes cross clusters between different cloud providers.
+
+![pipeline](/images/pipeline-error.png)
+
 #### On Cluster-b:
 ```bash
-kubectl get pods -n kubeflow -o wide
+kubectl get pods --all-namespaces -o wide
 ```
 
-**cluster-b** = Liqo virtual node on Datacrunch.
+![kubeflow-verda](/images/kubeflow-verda.png)
+
+
 
   
 ### Author
