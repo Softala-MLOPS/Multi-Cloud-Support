@@ -9,7 +9,7 @@ The testing environment has been a cPouta VM in CSC and a VM in DataCrunch. Both
 
 ## Developer Guide
 
-See the [Developer Guide](Developer-Guide.md) for detailed setup and usage instructions.
+See the [Demo Guide](Multi-cloud-mvp-demo.md) for detailed setup and usage instructions.
 
 ## Future backlog
 
