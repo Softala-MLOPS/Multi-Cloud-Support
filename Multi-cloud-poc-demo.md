@@ -299,9 +299,7 @@ This:
 
 First, download and install JupyterLab Desktop to your local machine:
 
-```bash
 https://github.com/jupyterlab/jupyterlab-desktop
-```
 
 ### Port-forward Kubeflow and MLflow services
 
