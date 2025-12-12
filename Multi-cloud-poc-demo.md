@@ -368,10 +368,6 @@ kubectl get pods --all-namespaces -o wide
 **Jouni Tuomela**
 
   
-### Author
-
-**Brown Ikechukwu Aniebonam**
-
 ## SSH Connnection for Verda
 
 #### Projects > Keys > SSH KEYS > +Create
@@ -388,9 +384,9 @@ https://docs.csc.fi/cloud/pouta/adding-images/#sharing-images-between-pouta-proj
 
 #### !!NOTE: OpenStack CLI does not give you any responds from invalid logins or most commands!!
 
-### Author
+### Author(s)
 
-**Eemil Airaksinen**
+**Brown Ikechukwu Aniebonam, Kosti Kangasmaa, Jouni Tuomela and Eemil Airaksinen**
 
 ---
 
